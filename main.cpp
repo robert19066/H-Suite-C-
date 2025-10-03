@@ -1,72 +1,68 @@
 ﻿
 #include <iostream>
-#include <string>
 #include <filesystem>
-#include "fancyprint.h"
+#include "./hsuite/fancyprint.h"
 
-using namespace std;
-using namespace std::filesystem;
+namespace fs = std::filesystem;
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     FancyPrint fp;
-    string pathStr;
-    string HfilenameFP = "fancyprint.h";
-    string HfilenameTS = "typesuite.h";
 
-    fp.Print_delimiter("FancyPrint + TypeSuite Installer");
-    fp.Print_info("This installer will copy the FancyPrint and TypeSuite header files to your project directory.", false);
+    fp.Print_delimiter("HSuite Installer");
 
-    pathStr = fp.Print_input("Please enter the full path to your project directory (e.g., C:\\Users\\YourName\\Documents\\MyProject)");
-    cout << "Thank you. Headers will be copied to " << pathStr << endl;
+    fp.Print_info("This installer will copy the 'hsuite' folder to your project directory.", false);
 
-    // --- Selection Menu ---
-    string options[] = {
-        "Install FancyPrint only",
-        "Install TypesSuite only",
-        "Install both FancyPrint and TypesSuite"
-    };
-    int choice = fp.Print_selection(options, 3);
+    // Ask for project path
+    std::string pathStr = fp.Print_input("Please enter the full path to your project directory");
+    fs::path targetPath(pathStr);
 
-    path projectPath(pathStr);
-    path targetParent = projectPath; // parent path for headers
+    fp.Print_info("Headers and libraries will be copied to: " + targetPath.string(), false);
 
-    try
-    {
-        // Locate project root dynamically
-        path exePath = absolute(argv[0]).parent_path();
+    try {
+        // Locate the source hsuite folder relative to executable
+        fs::path exePath = fs::absolute(argv[0]).parent_path();
+        fs::path sourceFolder = exePath.parent_path().parent_path().parent_path() / "hsuite"; // two levels up
 
-        auto findRoot = [&](const string& filename) -> path {
-            path current = exePath;
-            while (!current.empty()) {
-                if (exists(current / filename)) return current;
-                current = current.parent_path();
-            }
-            throw runtime_error("Could not locate " + filename);
-            };
+        if (!fs::exists(sourceFolder) || !fs::is_directory(sourceFolder)) {
+            throw std::runtime_error("Cannot locate 'hsuite' folder at: " + sourceFolder.string());
+        }
 
-        path sourceFileFP, sourceFileTS;
-        if (choice == 1 || choice == 3)
-            sourceFileFP = findRoot(HfilenameFP) / HfilenameFP;
-        if (choice == 2 || choice == 3)
-            sourceFileTS = findRoot(HfilenameTS) / HfilenameTS;
+        // Create target folder if it doesn't exist
+        fs::create_directories(targetPath / "hsuite");
 
         fp.Print_info("Copying files...", false);
-        fp.Print_loading(5, 200, '=');
+        fp.Print_loading(5, 150, '=');
 
-        create_directories(targetParent);
+        // Recursive copy of hsuite folder
+        for (const auto& entry : fs::recursive_directory_iterator(sourceFolder)) {
+            fs::path relativePath = fs::relative(entry.path(), sourceFolder);
+            fs::path targetEntry = targetPath / "hsuite" / relativePath;
 
-        if (choice == 1 || choice == 3)
-            copy_file(sourceFileFP, projectPath / HfilenameFP, copy_options::overwrite_existing);
-        if (choice == 2 || choice == 3)
-            copy_file(sourceFileTS, projectPath / HfilenameTS, copy_options::overwrite_existing);
+            if (fs::is_directory(entry)) {
+                fs::create_directories(targetEntry);
+            }
+            else if (fs::is_regular_file(entry)) {
+                fs::copy_file(entry.path(), targetEntry, fs::copy_options::overwrite_existing);
+            }
+        }
 
-        fp.Print_success("Installation completed successfully to " + projectPath.string(), false);
+        fp.Print_success("Installation of 'hsuite' completed successfully to " + targetPath.string(), false);
+
+        // Optional: open folder
+        if (fp.Print_confirm("Do you want to open the project folder now?")) {
+#ifdef _WIN32
+            std::string cmd = "start \"\" \"" + targetPath.string() + "\"";
+#else
+            std::string cmd = "xdg-open \"" + targetPath.string() + "\""; // Linux
+#endif
+            std::system(cmd.c_str());
+        }
+
     }
-    catch (exception& e)
-    {
-        fp.Print_error("An error occurred while copying the headers. Ensure the paths are correct and you have permissions.", false);
-        cout << e.what() << endl;
+    catch (const std::exception& e) {
+        fp.Print_error("An error occurred during installation.", false);
+        fp.Print_error(e.what(), false);
+        return 1;
     }
 
     return 0;
