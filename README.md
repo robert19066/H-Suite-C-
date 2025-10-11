@@ -1,6 +1,6 @@
 # HSuite
 
-A comprehensive C++ utility library providing elegant solutions for common programming tasks, from fancy terminal output to LLM integration(in v3 :D).
+A comprehensive C++ utility library providing elegant solutions for common programming tasks, from fancy terminal output to LLM integration.
 
 ## 📦 Installation
 
@@ -11,6 +11,7 @@ A comprehensive C++ utility library providing elegant solutions for common progr
 3. Include the headers you need in your C++ files:
    ```cpp
    #include "hsuite/fancyprint.h"
+   #include "hsuite/cllama.h"
    #include "hsuite/stb.h"
    #include "hsuite/typesuite.h"
    ```
@@ -18,7 +19,7 @@ A comprehensive C++ utility library providing elegant solutions for common progr
 ## 🎯 Features
 
 ### FancyPrint
-Beautiful terminal output with ANSI colors and interactive elements,an <iostream> replacement:
+Beautiful terminal output with ANSI colors and interactive elements:
 - Colored logging (info, warning, error, success)
 - User input prompts
 - Selection menus
@@ -35,6 +36,18 @@ int choice = FancyPrint::Print_selection(options, 3);
 bool confirmed = FancyPrint::Print_confirm("Continue?");
 ```
 
+### CLLama
+Simple integration with Ollama for local LLM interactions:
+- Query any Ollama model
+- List installed models
+- Install new models
+- Get responses directly or print to console
+
+```cpp
+CLLama::prompt("Hello, how are you?", "llama2");
+string response = CLLama::promptReturn("Explain AI", "llama2");
+string models = CLLama::listModels();
+```
 
 ### STB (Simple Text Buffer)
 Cross-platform console input handling:
@@ -69,6 +82,27 @@ string output = Cmd::run("ls -la");
 
 ## 📝 Example Usage
 
+### Simple Chatbot
+```cpp
+#include "hsuite/cllama.h"
+#include "hsuite/stb.h"
+
+int main() {
+    while (true) {
+        string model = "llama2";
+        FancyPrint::Print_info("You: ");
+        string user_input = STB::getText();
+        
+        if (user_input == "exit" || user_input == "quit") {
+            break;
+        }
+        
+        CLLama::prompt(user_input, model);
+    }
+    return 0;
+}
+```
+
 ### Interactive Menu
 ```cpp
 #include "hsuite/fancyprint.h"
@@ -88,7 +122,7 @@ int main() {
 ## 🔧 Requirements
 
 - C++17 or higher
-- For CLLama(v3): [Ollama](https://ollama.ai/) installed and running
+- For CLLama: [Ollama](https://ollama.ai/) installed and running
 - Cross-platform: Works on Windows, Linux, and macOS
 
 ## 📊 Version Status
@@ -101,7 +135,7 @@ Contributions are welcome! Feel free to submit issues and pull requests.
 
 ## 📄 License
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+[Add your license here]
 
 ## 🔗 Links
 
