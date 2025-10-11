@@ -32,6 +32,9 @@ public:
     static void Print_success(const std::string& message, bool minimal = false) {
         STB::printText((minimal ? FP_COLOR_SUCCESS "[+] " : FP_COLOR_SUCCESS "[SUCCESS] ") + message + FP_COLOR_RESET + "\n");
     }
+    static void Print_custom(const string mesage, const string logmesage) {
+        STB::printText("[" + logmesage + "]: " + mesage);
+	}
 
     // --- Input ---
     static std::string Print_input(const std::string& prompt) {
