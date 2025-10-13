@@ -1,5 +1,8 @@
 # HSuite
 
+v4 Status: Working on new features.
+please ignore the cmake stuff its only for testing purposes.
+
 A comprehensive C++ utility library providing elegant solutions for common programming tasks, from fancy terminal output to LLM integration.
 
 ## 📦 Installation
