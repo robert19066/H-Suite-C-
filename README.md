@@ -1,6 +1,7 @@
 # HSuite
+**Guys thank you so much we reached 100 views and 50 pulls! 🥳**
 
-v4 Status: Working on new features.
+**v4 Status: Working on new features.**
 please ignore the cmake stuff its only for testing purposes.
 
 A comprehensive C++ utility library providing elegant solutions for common programming tasks, from fancy terminal output to LLM integration.
